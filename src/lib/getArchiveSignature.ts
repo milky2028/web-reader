@@ -9,7 +9,7 @@ const ZIP_SECOND_BYTE = 139;
 
 const INVALID_ZIP = 'File is not a valid zip archive.';
 
-export function getZipFileSignature(bytes: Uint8Array | undefined) {
+export function getArchiveSignature(bytes: Uint8Array | undefined) {
 	if (bytes === undefined) {
 		throw new Error(INVALID_ZIP);
 	}
