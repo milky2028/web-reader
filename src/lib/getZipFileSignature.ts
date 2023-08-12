@@ -23,9 +23,6 @@ export function getZipFileSignature(bytes: Uint8Array | undefined) {
 		throw new Error(INVALID_ZIP);
 	}
 
-	const fileHeader = bytes.slice(0, 10);
-	console.log('initial signature', fileHeader);
-
 	const compressionType = view.getUint8(2);
 	const fileData = view.getUint8(3);
 	const lastModifiedDate = view.getUint32(4, true);
