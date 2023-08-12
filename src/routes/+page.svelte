@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { getArchiveSignature } from '$lib/getArchiveSignature';
+	import { getLastChunk } from '$lib/getLastChunk';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const files = event.currentTarget.files ?? [];
 		for (const file of files) {
-			const stream = file.stream();
+			const [forArchiveSignature, forDecompression] = file.stream().tee();
 
-			const { value: firstChunkData } = await stream.getReader().read();
-			console.log(getArchiveSignature(firstChunkData));
+			const { value: firstChunk } = await forArchiveSignature.getReader().read();
+			console.log(getArchiveSignature(firstChunk));
 		}
 	}
 </script>
