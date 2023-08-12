@@ -1,33 +1,22 @@
 <script lang="ts">
-	let pageUrls: string[] = [];
+	import { goto } from '$app/navigation';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
-		const { Archive } = await import('libarchive.js');
-		const { default: workerUrl } = await import('$lib/assets/worker-bundle.js?url');
-
-		Archive.init({ workerUrl });
+		const { Archive } = await import('$lib/archive');
+		const { cache } = await import('$lib/cache');
 
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		for (const file of files) {
 			const archive = await Archive.open(file);
-			const archivedFiles = await archive.extractFiles();
+			const archivedFiles = await archive.getFilesObject();
 
-			const archiveImages = Object.values(archivedFiles).map((archiveFile) => {
-				if (archiveFile instanceof File) {
-					return URL.createObjectURL(archiveFile);
-				}
+			const frontCover = await archive.extractSingleFile(Object.keys(archivedFiles)[0]);
+			const cacheKey = `${file.name}+${frontCover.name}`;
 
-				return '';
-			});
-
-			pageUrls = await Promise.all(archiveImages);
+			await cache.put(cacheKey, new Response(frontCover, { status: 200 }));
+			goto('/books');
 		}
 	}
 </script>
 
 <input on:change={onChange} type="file" accept=".cbr, .rar, .cbz, .zip" multiple />
-{#each pageUrls as url}
-	{#if url}
-		<img src={url} loading="lazy" alt="" width="100" />
-	{/if}
-{/each}
