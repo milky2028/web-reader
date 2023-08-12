@@ -1,5 +1,6 @@
 import { getCompressionType } from './getCompressionType';
 import { getFileDataSignature } from './getFileData';
+import { getLastModifiedDate } from './getLastModifiedDate';
 
 const ZIP_FIRST_BYTE = 31;
 const ZIP_SECOND_BYTE = 139;
@@ -22,9 +23,11 @@ export function getZipFileSignature(bytes: Uint8Array | undefined) {
 
 	const compressionType = view.getUint8(2);
 	const fileData = view.getUint8(3);
+	const lastModifiedDate = view.getUint32(4, true);
 
 	return {
 		compressionMethod: getCompressionType(compressionType),
+		lastModified: getLastModifiedDate(lastModifiedDate),
 		...getFileDataSignature(fileData)
 	};
 }
