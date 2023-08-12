@@ -1,28 +1,17 @@
 <script lang="ts">
-	import { getArchiveSignature } from '$lib/getArchiveSignature';
-	import { getLocalFileSignature } from '$lib/getLocalFileSignature';
-	import { INVALID_ZIP } from '$lib/invalidZip';
-
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
-		const files = event.currentTarget.files ?? [];
+		const { Archive } = await import('libarchive.js');
+		const { default: workerUrl } = await import('$lib/assets/worker-bundle.js?url');
+
+		Archive.init({ workerUrl });
+
+		const files = (event.target as HTMLInputElement)?.files ?? [];
 		for (const file of files) {
-			const [forArchiveSignature, forDecompression] = file.stream().tee();
-
-			const { value: firstChunk } = await forArchiveSignature.getReader().read();
-			if (!firstChunk) {
-				throw new Error(INVALID_ZIP);
-			}
-
-			const archiveSignature = getArchiveSignature(firstChunk);
-			const firstLocalFileSignature = getLocalFileSignature(
-				archiveSignature.endOfExtraData,
-				firstChunk
-			);
-
-			console.log(archiveSignature);
-			console.log(firstLocalFileSignature);
+			const archive = await Archive.open(file);
+			const obj = await archive.getFilesObject();
+			console.log(obj);
 		}
 	}
 </script>
 
-<input on:change={onChange} type="file" accept=".cbz, .gz" multiple />
+<input on:change={onChange} type="file" accept=".cbr, .rar" multiple />
