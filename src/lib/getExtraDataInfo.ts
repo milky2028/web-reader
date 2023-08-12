@@ -1,5 +1,6 @@
 import type { whatDataFollowsSignature } from './whatDataFollowsSignature';
 import { getTextFromBytes } from './getTextFromBytes';
+import { ARCHIVE_SIGNATURE_LENGTH } from './arrchiveSignatureLength';
 
 export function getExtraDataInfo(
 	info: ReturnType<typeof whatDataFollowsSignature>,
@@ -7,6 +8,9 @@ export function getExtraDataInfo(
 	endOfExtraData: number
 ) {
 	return Object.fromEntries(
-		info.map(([key, value]) => [key, value ? getTextFromBytes(bytes, endOfExtraData) : ''])
+		info.map(([key, value]) => [
+			key,
+			value ? getTextFromBytes(bytes, ARCHIVE_SIGNATURE_LENGTH, endOfExtraData) : ''
+		])
 	);
 }

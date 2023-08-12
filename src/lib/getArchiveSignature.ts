@@ -35,7 +35,7 @@ export function getArchiveSignature(bytes: Uint8Array) {
 	return {
 		compressionMethod: getCompressionType(compressionType),
 		lastModified: getLastModifiedDate(lastModifiedDate),
-		...getExtraDataInfo(fileDataSignature, bytes.slice(ARCHIVE_SIGNATURE_LENGTH), endOfExtraData),
+		...getExtraDataInfo(fileDataSignature, bytes, endOfExtraData),
 		compressionLevel,
 		operatingSystem: getOperatingSystem(operatingSystem),
 		endOfExtraData
