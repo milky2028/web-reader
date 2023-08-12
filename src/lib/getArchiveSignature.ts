@@ -5,18 +5,12 @@ import { getLastModifiedDate } from './getLastModifiedDate';
 import { getOperatingSystem } from './getOperatingSystem';
 import { getEndOfExtraData } from './getEndOfExtraData';
 import { hasExtraData } from './hasExtraData';
-import { ARCHIVE_SIGNATURE_LENGTH } from './arrchiveSignatureLength';
+import { INVALID_ZIP } from './invalidZip';
 
 const ZIP_FIRST_BYTE = 31;
 const ZIP_SECOND_BYTE = 139;
 
-const INVALID_ZIP = 'File is not a valid zip archive.';
-
-export function getArchiveSignature(bytes: Uint8Array | undefined) {
-	if (bytes === undefined) {
-		throw new Error(INVALID_ZIP);
-	}
-
+export function getArchiveSignature(bytes: Uint8Array) {
 	const view = new DataView(bytes.buffer);
 
 	const firstByte = view.getUint8(0);
