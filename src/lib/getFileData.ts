@@ -11,10 +11,10 @@ export function getFileDataSignature(uint8: number) {
 	const fileData = convertNumberToBinary(uint8);
 
 	return {
-		hasFileText: binaryStringToBoolean(fileData[0]),
-		hasFileHcrc: binaryStringToBoolean(fileData[1]),
-		hasExtraFileData: binaryStringToBoolean(fileData[2]),
-		hasFileName: binaryStringToBoolean(fileData[3]),
-		hasFileComments: binaryStringToBoolean(fileData[4])
+		textFollowsHeader: binaryStringToBoolean(fileData[0]),
+		CRCFollowsHeader: binaryStringToBoolean(fileData[1]),
+		extrasFollowHeader: binaryStringToBoolean(fileData[2]),
+		fileNameFollowsHeader: binaryStringToBoolean(fileData[3]),
+		commentsFollowHeader: binaryStringToBoolean(fileData[4])
 	};
 }
