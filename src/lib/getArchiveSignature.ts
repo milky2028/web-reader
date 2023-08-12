@@ -3,6 +3,9 @@ import { getExtraDataInfo } from './getExtraDataInfo';
 import { whatDataFollowsSignature } from './whatDataFollowsSignature';
 import { getLastModifiedDate } from './getLastModifiedDate';
 import { getOperatingSystem } from './getOperatingSystem';
+import { getEndOfExtraData } from './getEndOfExtraData';
+import { hasExtraData } from './hasExtraData';
+import { ARCHIVE_SIGNATURE_LENGTH } from './arrchiveSignatureLength';
 
 const ZIP_FIRST_BYTE = 31;
 const ZIP_SECOND_BYTE = 139;
@@ -30,12 +33,16 @@ export function getArchiveSignature(bytes: Uint8Array | undefined) {
 	const operatingSystem = view.getUint8(9);
 
 	const fileDataSignature = whatDataFollowsSignature(fileData);
+	const endOfExtraData = hasExtraData(fileDataSignature)
+		? ARCHIVE_SIGNATURE_LENGTH
+		: getEndOfExtraData(bytes);
 
 	return {
 		compressionMethod: getCompressionType(compressionType),
 		lastModified: getLastModifiedDate(lastModifiedDate),
-		...getExtraDataInfo(fileDataSignature, bytes.slice(10)),
+		...getExtraDataInfo(fileDataSignature, bytes.slice(ARCHIVE_SIGNATURE_LENGTH), endOfExtraData),
 		compressionLevel,
-		operatingSystem: getOperatingSystem(operatingSystem)
+		operatingSystem: getOperatingSystem(operatingSystem),
+		endOfExtraData
 	};
 }
