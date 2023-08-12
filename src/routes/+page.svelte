@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getZipFileSignature } from '$lib/getZipFileSignature';
+	import { getArchiveSignature } from '$lib/getArchiveSignature';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const files = event.currentTarget.files ?? [];
@@ -7,7 +7,7 @@
 			const stream = file.stream();
 
 			const { value: firstChunkData } = await stream.getReader().read();
-			console.log(getZipFileSignature(firstChunkData));
+			console.log(getArchiveSignature(firstChunkData));
 		}
 	}
 </script>
