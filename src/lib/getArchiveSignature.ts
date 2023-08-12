@@ -27,14 +27,12 @@ export function getArchiveSignature(bytes: Uint8Array) {
 	const operatingSystem = view.getUint8(9);
 
 	const fileDataSignature = whatDataFollowsSignature(fileData);
-	const endOfExtraData = hasExtraData(fileDataSignature)
-		? ARCHIVE_SIGNATURE_LENGTH
-		: getEndOfExtraData(bytes);
+	const endOfExtraData = hasExtraData(fileDataSignature) ? getEndOfExtraData(bytes) : 10;
 
 	return {
 		compressionMethod: getCompressionType(compressionType),
 		lastModified: getLastModifiedDate(lastModifiedDate),
-		...getExtraDataInfo(fileDataSignature, bytes.slice(ARCHIVE_SIGNATURE_LENGTH), endOfExtraData),
+		...getExtraDataInfo(fileDataSignature, bytes.slice(10), endOfExtraData),
 		compressionLevel,
 		operatingSystem: getOperatingSystem(operatingSystem),
 		endOfExtraData
