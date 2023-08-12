@@ -1,6 +1,7 @@
 import { getCompressionType } from './getCompressionType';
 import { getFileDataSignature } from './getFileData';
 import { getLastModifiedDate } from './getLastModifiedDate';
+import { getOperatingSystem } from './getOperatingSystem';
 
 const ZIP_FIRST_BYTE = 31;
 const ZIP_SECOND_BYTE = 139;
@@ -21,13 +22,20 @@ export function getZipFileSignature(bytes: Uint8Array | undefined) {
 		throw new Error(INVALID_ZIP);
 	}
 
+	const fileHeader = bytes.slice(0, 10);
+	console.log('initial signature', fileHeader);
+
 	const compressionType = view.getUint8(2);
 	const fileData = view.getUint8(3);
 	const lastModifiedDate = view.getUint32(4, true);
+	const compressionLevel = view.getUint8(8);
+	const operatingSystem = view.getUint8(9);
 
 	return {
 		compressionMethod: getCompressionType(compressionType),
 		lastModified: getLastModifiedDate(lastModifiedDate),
-		...getFileDataSignature(fileData)
+		...getFileDataSignature(fileData),
+		compressionLevel,
+		operatingSystem: getOperatingSystem(operatingSystem)
 	};
 }
