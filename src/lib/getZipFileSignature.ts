@@ -1,5 +1,6 @@
 import { getCompressionType } from './getCompressionType';
-import { getFileDataSignature } from './getFileData';
+import { getExtraDataInfo } from './getExtraDataInfo';
+import { whatDataFollowsSignature } from './whatDataFollowsSignature';
 import { getLastModifiedDate } from './getLastModifiedDate';
 import { getOperatingSystem } from './getOperatingSystem';
 
@@ -31,10 +32,12 @@ export function getZipFileSignature(bytes: Uint8Array | undefined) {
 	const compressionLevel = view.getUint8(8);
 	const operatingSystem = view.getUint8(9);
 
+	const fileDataSignature = whatDataFollowsSignature(fileData);
+
 	return {
 		compressionMethod: getCompressionType(compressionType),
 		lastModified: getLastModifiedDate(lastModifiedDate),
-		...getFileDataSignature(fileData),
+		...getExtraDataInfo(fileDataSignature, bytes.slice(10)),
 		compressionLevel,
 		operatingSystem: getOperatingSystem(operatingSystem)
 	};
