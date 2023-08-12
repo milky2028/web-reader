@@ -1,4 +1,5 @@
 import { getCompressionType } from './getCompressionType';
+import { getFileDataSignature } from './getFileData';
 
 const ZIP_FIRST_BYTE = 31;
 const ZIP_SECOND_BYTE = 139;
@@ -19,7 +20,11 @@ export function getZipFileSignature(bytes: Uint8Array | undefined) {
 		throw new Error(INVALID_ZIP);
 	}
 
+	const compressionType = view.getUint8(2);
+	const fileData = view.getUint8(3);
+
 	return {
-		compressionMethod: getCompressionType(view.getUint8(2))
+		compressionMethod: getCompressionType(compressionType),
+		...getFileDataSignature(fileData)
 	};
 }
