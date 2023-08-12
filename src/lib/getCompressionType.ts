@@ -1,3 +1,3 @@
-export function getCompressionType(type: number) {
-	return type === 8 ? 'deflate' : 'unknown';
+export function getCompressionType(uint8: number) {
+	return uint8 === 8 ? 'deflate' : 'unknown';
 }

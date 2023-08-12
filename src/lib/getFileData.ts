@@ -7,8 +7,8 @@ import { convertNumberToBinary } from './convertNumberToBinary';
 // 4) fname - the original file name is present
 // 5) fcomment - comment field is present
 
-export function getFileDataSignature(num: number) {
-	const fileData = convertNumberToBinary(num);
+export function getFileDataSignature(uint8: number) {
+	const fileData = convertNumberToBinary(uint8);
 
 	return {
 		hasFileText: binaryStringToBoolean(fileData[0]),
