@@ -12,4 +12,4 @@
 	}
 </script>
 
-<input on:change={onChange} type="file" />
+<input on:change={onChange} type="file" accept=".cbz, .gz" />
