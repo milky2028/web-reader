@@ -11,10 +11,10 @@
 	onMount(async () => {
 		const { cache } = await import('$lib/cache');
 
-		const cachedRequests = await cache.keys();
-		const libraryBuilder = cachedRequests
+		const cachedCovers = (await cache.keys()).filter((request) => !request.url.includes('reader'));
+		const libraryBuilder = cachedCovers
 			.map(async (request) => {
-				const response = await cache.match(request);
+				const response = await cache.match(request, { ignoreSearch: true });
 				const blob = await response?.blob();
 
 				const bookCoverUrl = new URL(request.url).pathname.slice(1);

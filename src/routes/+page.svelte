@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { isImage } from '$lib/isImage';
-	import { sortPages } from '$lib/sortPages';
+	import { sortPagesCoverFirst } from '$lib/sortPages';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
@@ -10,17 +10,23 @@
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		const processFiles = Array.from(files).map(async (file) => {
 			try {
+				const bookKey = file.name.split('.')[0];
+				const bookMatch = await cache.match(bookKey, { ignoreSearch: true });
+				if (!bookMatch) {
+					cache.put(`reader/${bookKey}`, new Response(file));
+				}
+
 				const archive = await Archive.open(file);
 				const archivedFiles = await archive.getFilesArray();
-				const imageFiles = archivedFiles.filter(isImage).sort(sortPages);
+				const imageFiles = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
 
 				const coverRef = imageFiles[0].file;
-				const cacheKey = `${file.name}+${coverRef.name}`;
-				const cacheMatch = await cache.match(cacheKey);
+				const coverKey = `${file.name}+${coverRef.name}`;
+				const coverMatch = await cache.match(coverKey, { ignoreSearch: true });
 
-				if (!cacheMatch && coverRef instanceof CompressedFile) {
+				if (!coverMatch && coverRef instanceof CompressedFile) {
 					const cover = await coverRef.extract();
-					await cache.put(cacheKey, new Response(cover, { status: 200 }));
+					await cache.put(coverKey, new Response(cover));
 				}
 			} catch (e) {
 				console.error(e);
