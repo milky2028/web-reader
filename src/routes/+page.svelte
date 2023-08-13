@@ -20,9 +20,11 @@
 				const imageFiles = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
 
 				const coverHandle = imageFiles[0].file;
+				const coverDirectory = await covers.getDirectoryHandle(bookName, { create: true });
+
 				if (coverHandle instanceof CompressedFile) {
 					const cover = await coverHandle.extract();
-					writeFile(coverHandle.name, covers, cover);
+					writeFile(coverHandle.name, coverDirectory, cover);
 					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
 			} catch (e) {

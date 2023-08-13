@@ -12,12 +12,16 @@
 	onMount(async () => {
 		const { covers } = await import('$lib/directories');
 
-		for await (const [fileName, handle] of covers) {
-			if (handle instanceof FileSystemFileHandle) {
-				const file = await handle.getFile();
-				const url = URL.createObjectURL(file);
+		for await (const [bookName, bookHandle] of covers) {
+			if (bookHandle instanceof FileSystemDirectoryHandle) {
+				for await (const [coverName, coverHandle] of bookHandle) {
+					if (coverHandle instanceof FileSystemFileHandle) {
+						const file = await coverHandle.getFile();
+						const url = URL.createObjectURL(file);
 
-				books = [{ name: fileName, firstPage: file.name, url }, ...books];
+						books = [{ name: bookName, firstPage: coverName, url }, ...books];
+					}
+				}
 			}
 		}
 	});
