@@ -18,4 +18,4 @@
 	});
 </script>
 
-<img src={url} loading="lazy" alt="" />
+<img src={url} loading="lazy" alt="" width="700" />
