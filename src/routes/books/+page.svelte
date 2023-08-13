@@ -11,14 +11,14 @@
 	onMount(async () => {
 		const { cache } = await import('$lib/cache');
 
-		const cachedCovers = await cache.keys();
+		const cachedCovers = (await cache.keys()).filter((request) => request.url.includes('cover'));
 		const libraryBuilder = cachedCovers
 			.map(async (request) => {
 				const response = await cache.match(request, { ignoreSearch: true });
 				const blob = await response?.blob();
 
 				const bookCoverUrl = new URL(request.url).pathname.slice(1);
-				const bookName = bookCoverUrl.split('+')[0].split('.')[0];
+				const bookName = bookCoverUrl.split('+')[0].split('.')[0].replace('cover', 'page');
 
 				return {
 					bookName,

@@ -21,12 +21,15 @@
 				const imageFiles = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
 
 				const coverRef = imageFiles[0].file;
-				const coverKey = `book/${bookKey}/page/${coverRef.name}`;
+				const coverKey = `book/${bookKey}/cover/${coverRef.name}`;
+				const pageKey = `book/${bookKey}/page/${coverRef.name}`;
 				const coverMatch = await cache.match(coverKey, { ignoreSearch: true });
 
 				if (!coverMatch && coverRef instanceof CompressedFile) {
 					const cover = await coverRef.extract();
+
 					await cache.put(coverKey, new Response(cover));
+					cache.put(pageKey, new Response(cover));
 				}
 			} catch (e) {
 				console.error(e);
