@@ -2,44 +2,35 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	type Book = {
-		bookName: string;
+		name: string;
 		url: string;
 	};
 
-	let cachedBooks: Book[] = [];
+	let books: Book[] = [];
 
 	onMount(async () => {
-		const { cache } = await import('$lib/cache');
+		const { covers } = await import('$lib/directories');
 
-		const cachedCovers = (await cache.keys()).filter((request) => request.url.includes('cover'));
-		const libraryBuilder = cachedCovers
-			.map(async (request) => {
-				const response = await cache.match(request, { ignoreSearch: true });
-				const blob = await response?.blob();
+		for await (const [fileName, handle] of covers) {
+			if (handle instanceof FileSystemFileHandle) {
+				const file = await handle.getFile();
+				const url = URL.createObjectURL(file);
 
-				const bookCoverUrl = new URL(request.url).pathname.slice(1);
-				const bookName = bookCoverUrl.split('+')[0].split('.')[0].replace('cover', 'page');
-
-				return {
-					bookName,
-					url: blob ? URL.createObjectURL(blob) : ''
-				};
-			})
-			.filter(async (url) => !!url);
-
-		cachedBooks = await Promise.all(libraryBuilder);
+				books = [{ name: fileName, url }, ...books];
+			}
+		}
 	});
 
 	onDestroy(() => {
-		for (const book of cachedBooks) {
+		for (const book of books) {
 			URL.revokeObjectURL(book.url);
 		}
 	});
 </script>
 
 <div><a href="/">Upload</a></div>
-{#each cachedBooks as book}
-	<a href="/{book.bookName}">
+{#each books as book}
+	<a href="/book/{book.name}">
 		<img src={book.url} loading="lazy" alt="" width="200" />
 	</a>
 {/each}
