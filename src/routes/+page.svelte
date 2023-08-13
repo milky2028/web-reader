@@ -27,13 +27,19 @@
 					writeFile(coverHandle.name, coverDirectory, cover);
 					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
+
+				return { bookName, firstPageName: coverHandle.name };
 			} catch (e) {
 				console.error(e);
 			}
 		});
 
-		await Promise.all(processFiles);
-		goto('/books');
+		const [entry] = await Promise.all(processFiles);
+		if (files.length === 1) {
+			goto(`/book/${entry?.bookName}/page/${entry?.firstPageName}`);
+		} else {
+			goto('/books');
+		}
 	}
 </script>
 
