@@ -1,30 +1,38 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { isImage } from '$lib/isImage';
+	import { MANIFEST, type BookManifest } from '$lib/manifest';
 	import { sortPagesCoverFirst } from '$lib/sortPages';
 	import { writeFile } from '$lib/writeFile';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
-		const { covers, books } = await import('$lib/directories');
+		const { books } = await import('$lib/directories');
 
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		const processFiles = Array.from(files).map(async (file) => {
 			try {
 				const bookName = file.name.split('.')[0];
-				const bookDirectory = await books.getDirectoryHandle(bookName, { create: true });
-				writeFile(bookName, bookDirectory, file);
 
 				const archive = await Archive.open(file);
 				const archivedFiles = await archive.getFilesArray();
-				const imageFiles = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
+				const pages = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
 
-				const coverHandle = imageFiles[0].file;
-				const coverDirectory = await covers.getDirectoryHandle(bookName, { create: true });
+				const coverHandle = pages[0].file;
 
 				if (coverHandle instanceof CompressedFile) {
 					const cover = await coverHandle.extract();
-					writeFile(coverHandle.name, coverDirectory, cover);
+
+					const bookDirectory = await books.getDirectoryHandle(bookName, { create: true });
+					writeFile(bookName, bookDirectory, file);
+
+					const manifest: BookManifest = {
+						cover: coverHandle.name,
+						pages: pages.map((page) => page.file.name)
+					};
+
+					const manifestFile = new File([JSON.stringify(manifest)], MANIFEST);
+					await writeFile(MANIFEST, bookDirectory, manifestFile);
 					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
 
@@ -34,12 +42,14 @@
 			}
 		});
 
-		const [entry] = await Promise.all(processFiles);
-		if (files.length === 1) {
-			goto(`/book/${entry?.bookName}/page/${entry?.firstPageName}`);
-		} else {
-			goto('/books');
-		}
+		try {
+			const [entry] = await Promise.all(processFiles);
+			if (files.length === 1) {
+				goto(`/book/${entry?.bookName}/page/${entry?.firstPageName}`);
+			} else {
+				goto('/books');
+			}
+		} catch {}
 	}
 </script>
 

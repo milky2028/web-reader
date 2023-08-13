@@ -18,4 +18,5 @@
 	});
 </script>
 
+<div><a href="/books">Books</a></div>
 <img src={url} loading="lazy" alt="" width="700" />
