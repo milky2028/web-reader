@@ -3,6 +3,7 @@
 
 	type Book = {
 		name: string;
+		firstPage: string;
 		url: string;
 	};
 
@@ -16,7 +17,7 @@
 				const file = await handle.getFile();
 				const url = URL.createObjectURL(file);
 
-				books = [{ name: fileName, url }, ...books];
+				books = [{ name: fileName, firstPage: file.name, url }, ...books];
 			}
 		}
 	});
@@ -30,7 +31,7 @@
 
 <div><a href="/">Upload</a></div>
 {#each books as book}
-	<a href="/book/{book.name}">
+	<a href="/book/{book.name}/page/{book.firstPage}">
 		<img src={book.url} loading="lazy" alt="" width="200" />
 	</a>
 {/each}
