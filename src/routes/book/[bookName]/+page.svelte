@@ -20,6 +20,12 @@
 				.filter(isImage)
 				.sort(sortPagesForReading)
 				.map(async ({ file }) => {
+					const pageKey = `book/${$page.params.bookName}/page/${file.name}`;
+					const pageMatch = await cache.match(pageKey, { ignoreSearch: true });
+					if (pageMatch) {
+						await pageMatch.blob();
+					}
+
 					if (file instanceof CompressedFile) {
 						const blob = await file.extract();
 						return URL.createObjectURL(blob);

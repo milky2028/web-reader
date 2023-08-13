@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	type Book = {
-		page: string;
+		bookName: string;
 		url: string;
 	};
 
@@ -11,7 +11,7 @@
 	onMount(async () => {
 		const { cache } = await import('$lib/cache');
 
-		const cachedCovers = (await cache.keys()).filter((request) => !request.url.includes('reader'));
+		const cachedCovers = await cache.keys();
 		const libraryBuilder = cachedCovers
 			.map(async (request) => {
 				const response = await cache.match(request, { ignoreSearch: true });
@@ -21,7 +21,7 @@
 				const bookName = bookCoverUrl.split('+')[0].split('.')[0];
 
 				return {
-					page: bookName,
+					bookName,
 					url: blob ? URL.createObjectURL(blob) : ''
 				};
 			})
@@ -39,7 +39,7 @@
 
 <div><a href="/">Upload</a></div>
 {#each cachedBooks as book}
-	<a href="/reader/{book.page}">
+	<a href="/{book.bookName}">
 		<img src={book.url} loading="lazy" alt="" width="200" />
 	</a>
 {/each}

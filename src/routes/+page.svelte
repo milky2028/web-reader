@@ -13,7 +13,7 @@
 				const bookKey = file.name.split('.')[0];
 				const bookMatch = await cache.match(bookKey, { ignoreSearch: true });
 				if (!bookMatch) {
-					cache.put(`reader/${bookKey}`, new Response(file));
+					cache.put(`book/${bookKey}`, new Response(file));
 				}
 
 				const archive = await Archive.open(file);
@@ -21,7 +21,7 @@
 				const imageFiles = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
 
 				const coverRef = imageFiles[0].file;
-				const coverKey = `${file.name}+${coverRef.name}`;
+				const coverKey = `book/${bookKey}/page/${coverRef.name}`;
 				const coverMatch = await cache.match(coverKey, { ignoreSearch: true });
 
 				if (!coverMatch && coverRef instanceof CompressedFile) {
