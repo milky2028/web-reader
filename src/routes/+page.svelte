@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { isImage } from '$lib/isImage';
+	import { sortPages } from '$lib/sortPages';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
@@ -10,9 +12,7 @@
 			try {
 				const archive = await Archive.open(file);
 				const archivedFiles = await archive.getFilesArray();
-				const imageFiles = archivedFiles.filter(
-					({ file }) => file.name.endsWith('.jpg') || file.name.endsWith('.jpeg')
-				);
+				const imageFiles = archivedFiles.filter(isImage).sort(sortPages);
 
 				const coverRef = imageFiles[0].file;
 				const cacheKey = `${file.name}+${coverRef.name}`;
