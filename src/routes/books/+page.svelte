@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { IterableDirectory } from '$lib/directories';
 	import { onDestroy, onMount } from 'svelte';
 
 	type Book = {
@@ -14,7 +15,7 @@
 
 		for await (const [bookName, bookHandle] of covers) {
 			if (bookHandle instanceof FileSystemDirectoryHandle) {
-				for await (const [coverName, coverHandle] of bookHandle) {
+				for await (const [coverName, coverHandle] of bookHandle as IterableDirectory) {
 					if (coverHandle instanceof FileSystemFileHandle) {
 						const file = await coverHandle.getFile();
 						const url = URL.createObjectURL(file);

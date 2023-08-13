@@ -1,7 +1,7 @@
 await navigator.storage.persist();
 
 type DirectoryIteratorResult = [string, FileSystemDirectoryHandle | FileSystemFileHandle];
-type IterableDirectory = FileSystemDirectoryHandle & {
+export type IterableDirectory = FileSystemDirectoryHandle & {
 	[Symbol.asyncIterator](): AsyncIterator<DirectoryIteratorResult>;
 };
 
