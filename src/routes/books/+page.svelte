@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { MANIFEST, type BookManifest } from '$lib/manifest';
 	import { onDestroy, onMount } from 'svelte';
 
 	type Book = {
@@ -12,18 +11,14 @@
 
 	onMount(async () => {
 		const { books } = await import('$lib/directories');
+		const { getManifest } = await import('$lib/manifest');
+		const { getFile } = await import('$lib/getFile');
 
 		for await (const [bookName, bookHandle] of books) {
 			try {
 				if (bookHandle instanceof FileSystemDirectoryHandle) {
-					const manifestHandle = await bookHandle.getFileHandle(MANIFEST);
-
-					const manifest = JSON.parse(
-						await (await manifestHandle.getFile()).text()
-					) as BookManifest;
-
-					const coverHandle = await bookHandle.getFileHandle(manifest.cover);
-					const cover = await coverHandle.getFile();
+					const manifest = await getManifest(bookHandle);
+					const cover = await getFile(manifest.cover, bookHandle);
 
 					const url = URL.createObjectURL(cover);
 					savedBooks = [{ name: bookName, firstPage: manifest.cover, url }, ...savedBooks];

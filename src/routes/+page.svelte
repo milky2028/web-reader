@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { isImage } from '$lib/isImage';
-	import { MANIFEST, type BookManifest } from '$lib/manifest';
+	import type { BookManifest } from '$lib/manifest';
 	import { sortPagesCoverFirst } from '$lib/sortPages';
-	import { writeFile } from '$lib/writeFile';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
 		const { books } = await import('$lib/directories');
+		const { writeFile } = await import('$lib/writeFile');
+		const { writeManifest } = await import('$lib/manifest');
 
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		const processFiles = Array.from(files).map(async (file) => {
@@ -31,8 +32,7 @@
 						pages: pages.map((page) => page.file.name)
 					};
 
-					const manifestFile = new File([JSON.stringify(manifest)], MANIFEST);
-					await writeFile(MANIFEST, bookDirectory, manifestFile);
+					await writeManifest(manifest, bookDirectory);
 					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
 
