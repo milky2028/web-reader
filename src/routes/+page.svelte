@@ -2,34 +2,28 @@
 	import { goto } from '$app/navigation';
 	import { isImage } from '$lib/isImage';
 	import { sortPagesCoverFirst } from '$lib/sortPages';
+	import { writeFile } from '$lib/writeFile';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
-		const { cache } = await import('$lib/cache');
+		const { covers, books } = await import('$lib/directories');
 
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		const processFiles = Array.from(files).map(async (file) => {
 			try {
-				const bookKey = file.name.split('.')[0];
-				const bookMatch = await cache.match(bookKey, { ignoreSearch: true });
-				if (!bookMatch) {
-					cache.put(`book/${bookKey}`, new Response(file));
-				}
+				const bookName = file.name.split('.')[0];
+				const bookDirectory = await books.getDirectoryHandle(bookName, { create: true });
+				writeFile(bookName, bookDirectory, file);
 
 				const archive = await Archive.open(file);
 				const archivedFiles = await archive.getFilesArray();
 				const imageFiles = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
 
-				const coverRef = imageFiles[0].file;
-				const coverKey = `book/${bookKey}/cover/${coverRef.name}`;
-				const pageKey = `book/${bookKey}/page/${coverRef.name}`;
-				const coverMatch = await cache.match(coverKey, { ignoreSearch: true });
-
-				if (!coverMatch && coverRef instanceof CompressedFile) {
-					const cover = await coverRef.extract();
-
-					await cache.put(coverKey, new Response(cover));
-					cache.put(pageKey, new Response(cover));
+				const coverHandle = imageFiles[0].file;
+				if (coverHandle instanceof CompressedFile) {
+					const cover = await coverHandle.extract();
+					writeFile(coverHandle.name, covers, cover);
+					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
 			} catch (e) {
 				console.error(e);
