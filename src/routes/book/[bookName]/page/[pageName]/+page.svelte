@@ -39,14 +39,16 @@
 		createdPages.push(objectUrl);
 		url = objectUrl;
 
-		page.subscribe(async ({ params }) => {
-			const file = await getPage(params.pageName, params.bookName);
-			const { currentPage } = await getCurrentPage();
-			cachePages(currentPage, $page.params.bookName);
+		page.subscribe(async ({ params: { pageName, bookName } }) => {
+			if (pageName && bookName) {
+				const file = await getPage(pageName, bookName);
+				const { currentPage } = await getCurrentPage();
+				cachePages(currentPage, bookName);
 
-			const objectUrl = URL.createObjectURL(file);
-			createdPages.push(objectUrl);
-			url = objectUrl;
+				const objectUrl = URL.createObjectURL(file);
+				createdPages.push(objectUrl);
+				url = objectUrl;
+			}
 		});
 
 		const { currentPage } = await getCurrentPage();
