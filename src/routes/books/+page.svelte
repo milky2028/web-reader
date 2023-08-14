@@ -36,8 +36,6 @@
 	});
 </script>
 
-<div><a href="/">Upload</a></div>
-<div><a href="/books">Books</a></div>
 {#each savedBooks as book (book.name)}
 	<a href="/book/{book.name}/page/{book.firstPage}">
 		<img src={book.url} loading="lazy" alt="" width="200" />
