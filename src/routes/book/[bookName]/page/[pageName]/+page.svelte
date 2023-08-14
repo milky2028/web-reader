@@ -60,7 +60,5 @@
 	});
 </script>
 
-<div><a href="/">Upload</a></div>
-<div><a href="/books">Books</a></div>
 <img src={url} loading="lazy" alt="" width="700" />
 <svelte:window on:keyup={onArrow} />
