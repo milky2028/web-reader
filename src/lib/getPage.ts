@@ -11,7 +11,7 @@ export async function getPage(nameOrIndex: string | number, book: string) {
 
 	let pageToGet = typeof nameOrIndex === 'string' ? nameOrIndex : '';
 	if (typeof nameOrIndex === 'number') {
-		const manifest = await getManifest(bookHandle);
+		const manifest = await getManifest(book);
 		pageToGet = manifest.pages[nameOrIndex];
 	}
 

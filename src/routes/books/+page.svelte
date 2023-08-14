@@ -17,7 +17,7 @@
 		for await (const [bookName, bookHandle] of books) {
 			try {
 				if (bookHandle instanceof FileSystemDirectoryHandle) {
-					const manifest = await getManifest(bookHandle);
+					const manifest = await getManifest(bookName);
 					const cover = await getFile(manifest.cover, bookHandle);
 
 					const url = URL.createObjectURL(cover);
@@ -37,6 +37,7 @@
 </script>
 
 <div><a href="/">Upload</a></div>
+<div><a href="/books">Books</a></div>
 {#each savedBooks as book (book.name)}
 	<a href="/book/{book.name}/page/{book.firstPage}">
 		<img src={book.url} loading="lazy" alt="" width="200" />
