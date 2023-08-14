@@ -1,8 +1,7 @@
 import { Archive as libarchive } from 'libarchive.js';
-import workerUrl from '$lib/assets/worker-bundle.js?url';
 import { CompressedFile as libarchiveCompressedFile } from 'libarchive.js/src/compressed-file';
 
-libarchive.init({ workerUrl });
+libarchive.init({ workerUrl: '/worker-bundle.js' });
 
 export type FilesArrayObject = { file: File | libarchiveCompressedFile; path: string };
 export const CompressedFile = libarchiveCompressedFile;
