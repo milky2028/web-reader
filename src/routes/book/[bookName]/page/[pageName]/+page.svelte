@@ -33,8 +33,6 @@
 		url = URL.createObjectURL(file);
 
 		page.subscribe(async ({ params }) => {
-			const { getPage } = await import('$lib/getPage');
-
 			const file = await getPage(params.pageName, params.bookName);
 			url = URL.createObjectURL(file);
 		});
