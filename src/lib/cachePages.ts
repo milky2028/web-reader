@@ -2,7 +2,7 @@ import { getPage } from './getPage';
 import { range } from './range';
 import { writeFile } from './writeFile';
 
-const NUMBER_OF_PAGES_TO_CACHE = 5;
+const NUMBER_OF_PAGES_TO_CACHE = 3;
 export async function cachePages(start: number, book: string) {
 	const { books } = await import('$lib/directories');
 	const { getManifest } = await import('$lib/manifest');
