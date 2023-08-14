@@ -1,3 +1,5 @@
+import { writeFile } from './writeFile';
+
 export async function getPage(nameOrIndex: string | number, book: string) {
 	const { books } = await import('$lib/directories');
 	const { Archive } = await import('$lib/archive');
@@ -19,5 +21,8 @@ export async function getPage(nameOrIndex: string | number, book: string) {
 
 	const archiveFile = await getFile(book, bookHandle);
 	const archive = await Archive.open(archiveFile);
-	return archive.extractSingleFile(pageToGet);
+	const file = await archive.extractSingleFile(pageToGet);
+
+	writeFile(pageToGet, bookHandle, file);
+	return file;
 }
