@@ -1,6 +1,6 @@
 export const MANIFEST = 'book-manifest.json';
 
-export type BookManifest = { cover: string; pages: string[] };
+export type BookManifest = { cover: string; pages: string[]; pageUrls: string[] };
 
 export async function writeManifest(
 	manifest: BookManifest,

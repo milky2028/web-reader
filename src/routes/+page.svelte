@@ -29,7 +29,8 @@
 
 					const manifest: BookManifest = {
 						cover: coverHandle.name,
-						pages: pages.map((page) => page.file.name)
+						pages: pages.map((page) => page.file.name),
+						pageUrls: []
 					};
 
 					await writeManifest(manifest, bookDirectory);
