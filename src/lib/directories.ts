@@ -1,5 +1,3 @@
-await navigator.storage.persist();
-
 type DirectoryIteratorResult = [string, FileSystemDirectoryHandle | FileSystemFileHandle];
 export type Kind = 'directory' | 'file';
 
