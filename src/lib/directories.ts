@@ -7,16 +7,8 @@ export type IterableDirectory = FileSystemDirectoryHandle & {
 	[Symbol.asyncIterator](): AsyncIterator<DirectoryIteratorResult>;
 };
 
-const root = await navigator.storage.getDirectory();
+export const root = await navigator.storage.getDirectory();
 
-export const covers = (await root.getDirectoryHandle('covers', {
-	create: true
-})) as IterableDirectory;
-
-export const books = (await root.getDirectoryHandle('books', {
-	create: true
-})) as IterableDirectory;
-
-export const settings = (await root.getDirectoryHandle('settings', {
+export const booksDirectory = (await root.getDirectoryHandle('books', {
 	create: true
 })) as IterableDirectory;
