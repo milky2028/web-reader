@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { books, getPage, type BookManifest } from '$lib/bookStore';
-	import { derived } from 'svelte/store';
+	import { derived, readable } from 'svelte/store';
 
 	function getCovers($books: Map<string, BookManifest>) {
 		return derived(
@@ -9,7 +9,7 @@
 		);
 	}
 
-	let covers = getCovers($books);
+	let covers = readable([] as string[]);
 	$: covers = getCovers($books);
 </script>
 

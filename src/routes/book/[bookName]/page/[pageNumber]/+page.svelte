@@ -2,8 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { books, getPage } from '$lib/bookStore';
+	import { readable } from 'svelte/store';
 
-	let pageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
+	let pageUrl = readable('');
 	$: pageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
 
 	async function onArrow(event: KeyboardEvent) {
