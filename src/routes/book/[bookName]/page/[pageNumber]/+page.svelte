@@ -16,6 +16,7 @@
 			const nextPage = currentIndex + 1 >= lastPage ? lastPage : currentIndex + 1;
 
 			books.createPage(nextPage + 1, $page.params.bookName, $books);
+			books.createPage(nextPage + 2, $page.params.bookName, $books);
 			goto(`/book/${$page.params.bookName}/page/${nextPage}`);
 		}
 
