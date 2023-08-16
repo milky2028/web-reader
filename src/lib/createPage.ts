@@ -15,8 +15,6 @@ export async function createPage(
 	const book = books.get(bookName);
 	const url = book?.pageUrls[pageNumber];
 
-	console.log(book);
-
 	if (book) {
 		if (url) {
 			return { url, books };
