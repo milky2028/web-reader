@@ -12,12 +12,12 @@
 
 	onMount(async () => {
 		const processCovers = [...$books].map(async ([bookName]) => {
-			const { url } = await getPageUrl(0, bookName, $books);
+			const url = await getPageUrl(0, bookName, $books);
 			return { url, bookName };
 		});
 
-		books.set($books);
 		covers = await Promise.all(processCovers);
+		books.addPageUrls(...covers.map(({ bookName, url }) => ({ bookName, urls: [url] })));
 	});
 </script>
 

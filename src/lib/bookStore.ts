@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store';
-import { createPage } from './createPage';
 import { browser } from '$app/environment';
 export const MANIFEST = 'book-manifest.json';
 
@@ -56,11 +55,29 @@ function createBookStore() {
 		});
 	}
 
+	type AddPageUrlsParams = {
+		bookName: string;
+		urls: string[];
+	};
+
+	function addPageUrls(...updates: AddPageUrlsParams[]) {
+		update((books) => {
+			for (const { bookName, urls } of updates) {
+				const book = books.get(bookName);
+				if (book) {
+					book.pageUrls = [...book.pageUrls, ...urls];
+				}
+			}
+
+			return books;
+		});
+	}
+
 	return {
 		subscribe,
 		intialize,
 		add,
-		set
+		addPageUrls
 	};
 }
 

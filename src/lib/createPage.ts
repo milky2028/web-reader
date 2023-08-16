@@ -17,15 +17,13 @@ export async function createPage(
 
 	if (book) {
 		if (url) {
-			return { url, books };
+			return url;
 		}
 
 		if (await exists(`${pageNumber}`, bookHandle)) {
 			const file = await getFile(`${pageNumber}`, bookHandle);
 
-			const url = URL.createObjectURL(file);
-			book.pageUrls[pageNumber] = url;
-			return { url, books };
+			return URL.createObjectURL(file);
 		}
 
 		const archiveFile = await getFile(bookName, bookHandle);
@@ -36,11 +34,9 @@ export async function createPage(
 			const file = await archive.extractSingleFile(pageFileName);
 
 			writeFile(`${pageNumber}`, bookHandle, file);
-			const url = URL.createObjectURL(file);
-			book.pageUrls[pageNumber] = url;
-			return { url, books };
+			return URL.createObjectURL(file);
 		}
 	}
 
-	return { url: '', books };
+	return '';
 }

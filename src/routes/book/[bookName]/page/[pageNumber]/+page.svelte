@@ -6,25 +6,21 @@
 	import { getPageUrl } from '$lib/getPageUrl';
 	import { onMount } from 'svelte';
 
-	let pageUrl: string | Promise<string>;
+	let pageUrl: string;
 	$: {
 		(async () => {
 			if (browser) {
-				const { url } = await getPageUrl(+$page.params.pageNumber, $page.params.bookName, $books);
+				const url = await getPageUrl(+$page.params.pageNumber, $page.params.bookName, $books);
 				pageUrl = url;
 			}
 		})();
 	}
 
 	onMount(async () => {
-		const { url, books: updatedBooks } = await getPageUrl(
-			+$page.params.pageNumber,
-			$page.params.bookName,
-			$books
-		);
-
+		const url = await getPageUrl(+$page.params.pageNumber, $page.params.bookName, $books);
 		pageUrl = url;
-		books.set(updatedBooks);
+
+		books.addPageUrls({ bookName: $page.params.bookName, urls: [url] });
 	});
 
 	async function onArrow(event: KeyboardEvent) {

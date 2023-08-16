@@ -7,5 +7,5 @@ export function getPageUrl(pageNumber: number, bookName: string, books: Map<stri
 		return createPage(pageNumber, bookName, books);
 	}
 
-	return Promise.resolve({ url: page, books });
+	return Promise.resolve(page);
 }
