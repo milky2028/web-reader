@@ -36,7 +36,7 @@
 					};
 
 					books.add(bookName, manifest);
-					await writeFile(coverHandle.name, bookDirectory, cover);
+					await writeFile(`0`, bookDirectory, cover);
 				}
 
 				return bookName;
