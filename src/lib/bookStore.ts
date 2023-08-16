@@ -87,7 +87,7 @@ function createBookStore() {
 					const file = await archive.extractSingleFile(pageFileName);
 					book.pageUrls[pageNumber] = URL.createObjectURL(file);
 
-					writeFile(`${pageNumber}`, bookHandle, file);
+					await writeFile(`${pageNumber}`, bookHandle, file);
 					return set(books);
 				}
 			}
