@@ -1,6 +1,6 @@
 import { derived, writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import { writeFile } from './writeFile';
+import { extractPage } from './extractPage';
 
 const MANIFEST = 'book-manifest.json';
 
@@ -48,52 +48,22 @@ async function createBookStore() {
 		});
 	}
 
-	function add(bookName: string, manifest: BookManifest) {
-		update((books) => {
-			books.set(bookName, manifest);
-			return new Map(books);
-		});
-	}
-
 	async function createPage(
 		pageNumber: number,
 		bookName: string,
 		$books: Map<string, BookManifest>
 	) {
-		const { booksDirectory } = await import('$lib/directories');
-		const { Archive } = await import('$lib/archive');
-		const { exists } = await import('./exists');
-		const { getFile } = await import('./getFile');
-
-		const bookHandle = await booksDirectory.getDirectoryHandle(bookName);
-		const book = $books.get(bookName);
-		const url = book?.pageUrls[pageNumber];
-
-		if (book) {
-			if (!url) {
-				if (await exists(`${pageNumber}`, bookHandle)) {
-					const file = await getFile(`${pageNumber}`, bookHandle);
-					book.pageUrls[pageNumber] = URL.createObjectURL(file);
-
-					return set($books);
-				}
-
-				const archiveFile = await getFile(bookName, bookHandle);
-				const archive = await Archive.open(archiveFile);
-
-				const pageFileName = $books.get(bookName)?.pages[pageNumber];
-				if (pageFileName) {
-					const file = await archive.extractSingleFile(pageFileName);
-
-					// @ts-expect-error _worker is private, but workers don't terminate properly
-					archive._worker.terminate();
-					book.pageUrls[pageNumber] = URL.createObjectURL(file);
-
-					await writeFile(`${pageNumber}`, bookHandle, file);
-					return set($books);
-				}
-			}
+		const books = await extractPage(pageNumber, bookName, $books);
+		if (books) {
+			set(books);
 		}
+	}
+
+	function add(bookName: string, manifest: BookManifest) {
+		update((books) => {
+			books.set(bookName, manifest);
+			return new Map(books);
+		});
 	}
 
 	return {
