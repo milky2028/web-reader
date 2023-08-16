@@ -10,6 +10,8 @@
 		const pages = $books.get($page.params.bookName)?.pages ?? [];
 		const currentIndex = +$page.params.pageNumber;
 
+		books.cachePages(+$page.params.pageNumber, $page.params.bookName);
+
 		if (event.key === 'ArrowRight') {
 			const lastPage = pages.length - 1;
 			const nextPage = currentIndex + 1 >= lastPage ? lastPage : currentIndex + 1;

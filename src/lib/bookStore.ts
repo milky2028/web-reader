@@ -1,7 +1,9 @@
-import { derived, writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { writeFile } from './writeFile';
-export const MANIFEST = 'book-manifest.json';
+import { range } from './range';
+
+const MANIFEST = 'book-manifest.json';
 
 export type BookManifest = { name: string; pages: string[]; pageUrls: string[] };
 
@@ -56,18 +58,16 @@ function createBookStore() {
 		});
 	}
 
-	async function createPage(
-		pageNumber: number,
-		bookName: string,
-		books: Map<string, BookManifest>
-	) {
+	async function createPage(pageNumber: number, bookName: string) {
 		const { booksDirectory } = await import('$lib/directories');
 		const { Archive } = await import('$lib/archive');
 		const { exists } = await import('./exists');
 		const { getFile } = await import('./getFile');
 
+		const $books = get(books);
+
 		const bookHandle = await booksDirectory.getDirectoryHandle(bookName);
-		const book = books.get(bookName);
+		const book = $books.get(bookName);
 		const url = book?.pageUrls[pageNumber];
 
 		if (book) {
@@ -76,29 +76,43 @@ function createBookStore() {
 					const file = await getFile(`${pageNumber}`, bookHandle);
 					book.pageUrls[pageNumber] = URL.createObjectURL(file);
 
-					return set(books);
+					return set($books);
 				}
 
 				const archiveFile = await getFile(bookName, bookHandle);
 				const archive = await Archive.open(archiveFile);
 
-				const pageFileName = books.get(bookName)?.pages[pageNumber];
+				const pageFileName = $books.get(bookName)?.pages[pageNumber];
 				if (pageFileName) {
 					const file = await archive.extractSingleFile(pageFileName);
 					book.pageUrls[pageNumber] = URL.createObjectURL(file);
 
 					await writeFile(`${pageNumber}`, bookHandle, file);
-					return set(books);
+					return set($books);
 				}
 			}
 		}
+	}
+
+	const NUMBER_OF_PAGES_TO_CACHE = 10;
+	function cachePages(start: number, bookName: string) {
+		const $books = get(books);
+		const book = $books.get(bookName);
+		const processPages = range({
+			start,
+			length: NUMBER_OF_PAGES_TO_CACHE,
+			max: book?.pages.length ?? 0
+		}).map((index) => createPage(index, bookName));
+
+		return Promise.all(processPages);
 	}
 
 	return {
 		subscribe,
 		intialize,
 		add,
-		createPage
+		createPage,
+		cachePages
 	};
 }
 
@@ -109,7 +123,7 @@ export function getPage(pageNumber: number, bookName: string) {
 		if (browser) {
 			const page = $books.get(bookName)?.pageUrls[pageNumber];
 			if (!page) {
-				books.createPage(pageNumber, bookName, $books);
+				books.createPage(pageNumber, bookName);
 			}
 
 			return page ?? '';
