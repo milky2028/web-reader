@@ -14,6 +14,8 @@
 		if (event.key === 'ArrowRight') {
 			const lastPage = pages.length - 1;
 			const nextPage = currentIndex + 1 >= lastPage ? lastPage : currentIndex + 1;
+
+			books.createPage(nextPage + 1, $page.params.bookName, $books);
 			goto(`/book/${$page.params.bookName}/page/${nextPage}`);
 		}
 
