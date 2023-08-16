@@ -1,43 +1,28 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { books } from '$lib/bookStore';
+	import { getPageUrl } from '$lib/getPageUrl';
+	import { onMount } from 'svelte';
 
-	type Book = {
-		name: string;
-		firstPage: string;
+	type Cover = {
 		url: string;
+		bookName: string;
 	};
 
-	let savedBooks: Book[] = [];
+	let covers: Cover[] = [];
 
 	onMount(async () => {
-		const { books } = await import('$lib/directories');
-		const { getManifest } = await import('$lib/manifest');
-		const { getFile } = await import('$lib/getFile');
+		const processCovers = [...$books].map(async ([bookName]) => {
+			const { url } = await getPageUrl(0, bookName, $books);
+			return { url, bookName };
+		});
 
-		for await (const [bookName, bookHandle] of books) {
-			try {
-				if (bookHandle instanceof FileSystemDirectoryHandle) {
-					const manifest = await getManifest(bookName);
-					const cover = await getFile(manifest.cover, bookHandle);
-
-					const url = URL.createObjectURL(cover);
-					savedBooks = [{ name: bookName, firstPage: manifest.cover, url }, ...savedBooks];
-				}
-			} catch (e) {
-				console.error(e);
-			}
-		}
-	});
-
-	onDestroy(() => {
-		for (const book of savedBooks) {
-			URL.revokeObjectURL(book.url);
-		}
+		books.set($books);
+		covers = await Promise.all(processCovers);
 	});
 </script>
 
-{#each savedBooks as book (book.name)}
-	<a href="/book/{book.name}/page/{book.firstPage}">
-		<img src={book.url} loading="lazy" alt="" width="200" />
+{#each covers as cover}
+	<a href="/book/{cover.bookName}/page/0">
+		<img src={cover.url} loading="lazy" alt="" width="200" />
 	</a>
 {/each}

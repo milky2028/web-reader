@@ -1,7 +1,9 @@
 import { writable } from 'svelte/store';
+import { createPage } from './createPage';
+import { browser } from '$app/environment';
 export const MANIFEST = 'book-manifest.json';
 
-export type BookManifest = { name: string; cover: string; pages: string[]; pageUrls: string[] };
+export type BookManifest = { name: string; pages: string[]; pageUrls: string[] };
 
 async function writeManifest(manifest: Map<string, BookManifest>) {
 	const { writeFile } = await import('./writeFile');
@@ -26,16 +28,23 @@ async function getManifest() {
 }
 
 function createBookStore() {
-	const books = new Map<string, BookManifest>();
-	const { subscribe, update, set } = writable(books);
+	const { subscribe, update, set } = writable(new Map<string, BookManifest>());
 
 	async function intialize() {
 		const manifest = await getManifest();
-		set(manifest);
-	}
 
-	function get(bookName: string) {
-		return books.get(bookName) as BookManifest;
+		set(manifest);
+		subscribe((manifest) => {
+			if (browser && manifest.size > 0) {
+				const manifestWithoutUrls = new Map(
+					[...manifest.entries()].map(([bookName, bookManifest]) => {
+						return [bookName, { ...bookManifest, pageUrls: [] }];
+					})
+				);
+
+				writeManifest(manifestWithoutUrls);
+			}
+		});
 	}
 
 	function add(bookName: string, manifest: BookManifest) {
@@ -43,29 +52,15 @@ function createBookStore() {
 			const updatedBooks = books.set(bookName, manifest);
 			writeManifest(books);
 
-			console.log(books);
 			return new Map(updatedBooks);
-		});
-	}
-
-	function updateBook(bookName: string, newManifest: Partial<BookManifest>) {
-		update((books) => {
-			const currentBook = get(bookName);
-			const updatedBook = { ...newManifest, ...currentBook };
-			books.set(bookName, updatedBook);
-			writeManifest(books);
-
-			console.log(books);
-			return new Map(books);
 		});
 	}
 
 	return {
 		subscribe,
 		intialize,
-		get,
 		add,
-		updateBook
+		set
 	};
 }
 

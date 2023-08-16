@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { isImage } from '$lib/isImage';
-	import type { BookManifest } from '$lib/manifest';
+	import { type BookManifest, books } from '$lib/bookStore';
 	import { sortPagesCoverFirst } from '$lib/sortPages';
 
 	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
-		const { books } = await import('$lib/directories');
+		const { booksDirectory } = await import('$lib/directories');
 		const { writeFile } = await import('$lib/writeFile');
-		const { writeManifest } = await import('$lib/manifest');
+
+		await navigator.storage.persist();
 
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		const processFiles = Array.from(files).map(async (file) => {
@@ -24,20 +25,20 @@
 				if (coverHandle instanceof CompressedFile) {
 					const cover = await coverHandle.extract();
 
-					const bookDirectory = await books.getDirectoryHandle(bookName, { create: true });
+					const bookDirectory = await booksDirectory.getDirectoryHandle(bookName, { create: true });
 					writeFile(bookName, bookDirectory, file);
 
 					const manifest: BookManifest = {
-						cover: coverHandle.name,
+						name: bookName,
 						pages: pages.map((page) => page.file.name),
-						pageUrls: []
+						pageUrls: [URL.createObjectURL(cover)]
 					};
 
-					await writeManifest(manifest, bookDirectory);
+					books.add(bookName, manifest);
 					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
 
-				return { bookName, firstPageName: coverHandle.name };
+				return { bookName, cover: coverHandle.name };
 			} catch (e) {
 				console.error(e);
 			}
@@ -46,7 +47,7 @@
 		try {
 			const [entry] = await Promise.all(processFiles);
 			if (files.length === 1) {
-				goto(`/book/${entry?.bookName}/page/${entry?.firstPageName}`);
+				goto(`/book/${entry?.bookName}/page/0`);
 			} else {
 				goto('/books');
 			}
