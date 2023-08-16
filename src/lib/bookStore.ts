@@ -94,23 +94,10 @@ async function createBookStore() {
 		}
 	}
 
-	const NUMBER_OF_PAGES_TO_CACHE = 10;
-	async function cachePages(start: number, bookName: string, $books: Map<string, BookManifest>) {
-		const book = $books.get(bookName);
-		const processPages = range({
-			start,
-			length: NUMBER_OF_PAGES_TO_CACHE,
-			max: book?.pages.length ?? 0
-		}).map((index) => createPage(index, bookName, $books));
-
-		await Promise.all(processPages);
-	}
-
 	return {
 		subscribe,
 		add,
-		createPage,
-		cachePages
+		createPage
 	};
 }
 

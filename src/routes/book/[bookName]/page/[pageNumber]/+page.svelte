@@ -21,8 +21,6 @@
 			const previousPage = currentIndex - 1 < 0 ? 0 : currentIndex - 1;
 			goto(`/book/${$page.params.bookName}/page/${previousPage}`);
 		}
-
-		await books.cachePages(+$page.params.pageNumber, $page.params.bookName, $books);
 	}
 </script>
 
