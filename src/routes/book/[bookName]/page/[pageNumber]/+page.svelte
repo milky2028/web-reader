@@ -1,27 +1,10 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { books } from '$lib/bookStore';
-	import { getPageUrl } from '$lib/getPageUrl';
-	import { onMount } from 'svelte';
+	import { books, getPage } from '$lib/bookStore';
 
-	let pageUrl: string;
-	$: {
-		(async () => {
-			if (browser) {
-				const url = await getPageUrl(+$page.params.pageNumber, $page.params.bookName, $books);
-				pageUrl = url;
-			}
-		})();
-	}
-
-	onMount(async () => {
-		const url = await getPageUrl(+$page.params.pageNumber, $page.params.bookName, $books);
-		pageUrl = url;
-
-		books.addPageUrls({ bookName: $page.params.bookName, urls: [url] });
-	});
+	let pageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
+	$: pageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
 
 	async function onArrow(event: KeyboardEvent) {
 		const pages = $books.get($page.params.bookName)?.pages ?? [];
@@ -40,11 +23,5 @@
 	}
 </script>
 
-{#await pageUrl}
-	<div>Loading...</div>
-{:then url}
-	{#if url}
-		<img src={url} loading="lazy" alt="" width="700" />
-	{/if}
-{/await}
+<img src={$pageUrl} loading="lazy" alt="" width="700" />
 <svelte:window on:keyup={onArrow} />

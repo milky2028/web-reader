@@ -1,28 +1,20 @@
 <script lang="ts">
-	import { books } from '$lib/bookStore';
-	import { getPageUrl } from '$lib/getPageUrl';
-	import { onMount } from 'svelte';
+	import { books, getPage, type BookManifest } from '$lib/bookStore';
+	import { derived } from 'svelte/store';
 
-	type Cover = {
-		url: string;
-		bookName: string;
-	};
+	function getCovers($books: Map<string, BookManifest>) {
+		return derived(
+			[...$books].map(([bookName]) => getPage(0, bookName)),
+			(cover) => cover
+		);
+	}
 
-	let covers: Cover[] = [];
-
-	onMount(async () => {
-		const processCovers = [...$books].map(async ([bookName]) => {
-			const url = await getPageUrl(0, bookName, $books);
-			return { url, bookName };
-		});
-
-		covers = await Promise.all(processCovers);
-		books.addPageUrls(...covers.map(({ bookName, url }) => ({ bookName, urls: [url] })));
-	});
+	let covers = getCovers($books);
+	$: covers = getCovers($books);
 </script>
 
-{#each covers as cover}
-	<a href="/book/{cover.bookName}/page/0">
-		<img src={cover.url} loading="lazy" alt="" width="200" />
+{#each $books as [bookName], i (bookName)}
+	<a href="/book/{bookName}/page/0">
+		<img src={$covers[i]} loading="lazy" alt="" width="200" />
 	</a>
 {/each}

@@ -4,7 +4,7 @@
 	import { type BookManifest, books } from '$lib/bookStore';
 	import { sortPagesCoverFirst } from '$lib/sortPages';
 
-	async function onChange(event: Event & { currentTarget: HTMLInputElement }) {
+	async function onUpload(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
 		const { booksDirectory } = await import('$lib/directories');
 		const { writeFile } = await import('$lib/writeFile');
@@ -28,26 +28,28 @@
 					const bookDirectory = await booksDirectory.getDirectoryHandle(bookName, { create: true });
 					writeFile(bookName, bookDirectory, file);
 
+					const coverUrl = URL.createObjectURL(cover);
 					const manifest: BookManifest = {
 						name: bookName,
 						pages: pages.map((page) => page.file.name),
-						pageUrls: [URL.createObjectURL(cover)]
+						pageUrls: [coverUrl]
 					};
 
 					books.add(bookName, manifest);
 					await writeFile(coverHandle.name, bookDirectory, cover);
 				}
 
-				return { bookName, cover: coverHandle.name };
+				return bookName;
 			} catch (e) {
 				console.error(e);
+				return null;
 			}
 		});
 
 		try {
 			const [entry] = await Promise.all(processFiles);
-			if (files.length === 1) {
-				goto(`/book/${entry?.bookName}/page/0`);
+			if (files.length === 1 && entry) {
+				goto(`/book/${entry}/page/0`);
 			} else {
 				goto('/books');
 			}
@@ -55,4 +57,4 @@
 	}
 </script>
 
-<input on:change={onChange} type="file" accept=".cbr, .rar, .cbz, .zip" multiple />
+<input on:change={onUpload} type="file" accept=".cbr, .rar, .cbz, .zip" multiple />
