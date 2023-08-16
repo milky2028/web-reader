@@ -39,6 +39,8 @@
 					await writeFile(`0`, bookDirectory, cover);
 				}
 
+				// @ts-expect-error _worker is private, but workers don't terminate properly
+				archive._worker.terminate();
 				return bookName;
 			} catch (e) {
 				console.error(e);

@@ -1,7 +1,6 @@
 import { derived, writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { writeFile } from './writeFile';
-import { range } from './range';
 
 const MANIFEST = 'book-manifest.json';
 
@@ -85,6 +84,9 @@ async function createBookStore() {
 				const pageFileName = $books.get(bookName)?.pages[pageNumber];
 				if (pageFileName) {
 					const file = await archive.extractSingleFile(pageFileName);
+
+					// @ts-expect-error _worker is private, but workers don't terminate properly
+					archive._worker.terminate();
 					book.pageUrls[pageNumber] = URL.createObjectURL(file);
 
 					await writeFile(`${pageNumber}`, bookHandle, file);
