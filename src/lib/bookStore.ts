@@ -1,4 +1,4 @@
-import { derived, get, writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { writeFile } from './writeFile';
 import { range } from './range';
@@ -29,26 +29,24 @@ async function getManifest() {
 	}
 }
 
-function createBookStore() {
+async function createBookStore() {
 	const { subscribe, update, set } = writable(new Map<string, BookManifest>());
 
-	async function intialize() {
-		if (browser) {
-			const manifest = await getManifest();
+	if (browser) {
+		const manifest = await getManifest();
 
-			set(manifest);
-			subscribe((manifest) => {
-				if (browser && manifest.size > 0) {
-					const manifestWithoutUrls = new Map(
-						[...manifest.entries()].map(([bookName, bookManifest]) => {
-							return [bookName, { ...bookManifest, pageUrls: [] }];
-						})
-					);
+		set(manifest);
+		subscribe((manifest) => {
+			if (browser && manifest.size > 0) {
+				const manifestWithoutUrls = new Map(
+					[...manifest.entries()].map(([bookName, bookManifest]) => {
+						return [bookName, { ...bookManifest, pageUrls: [] }];
+					})
+				);
 
-					writeManifest(manifestWithoutUrls);
-				}
-			});
-		}
+				writeManifest(manifestWithoutUrls);
+			}
+		});
 	}
 
 	function add(bookName: string, manifest: BookManifest) {
@@ -58,13 +56,15 @@ function createBookStore() {
 		});
 	}
 
-	async function createPage(pageNumber: number, bookName: string) {
+	async function createPage(
+		pageNumber: number,
+		bookName: string,
+		$books: Map<string, BookManifest>
+	) {
 		const { booksDirectory } = await import('$lib/directories');
 		const { Archive } = await import('$lib/archive');
 		const { exists } = await import('./exists');
 		const { getFile } = await import('./getFile');
-
-		const $books = get(books);
 
 		const bookHandle = await booksDirectory.getDirectoryHandle(bookName);
 		const book = $books.get(bookName);
@@ -95,35 +95,33 @@ function createBookStore() {
 	}
 
 	const NUMBER_OF_PAGES_TO_CACHE = 10;
-	function cachePages(start: number, bookName: string) {
-		const $books = get(books);
+	async function cachePages(start: number, bookName: string, $books: Map<string, BookManifest>) {
 		const book = $books.get(bookName);
 		const processPages = range({
 			start,
 			length: NUMBER_OF_PAGES_TO_CACHE,
 			max: book?.pages.length ?? 0
-		}).map((index) => createPage(index, bookName));
+		}).map((index) => createPage(index, bookName, $books));
 
-		return Promise.all(processPages);
+		await Promise.all(processPages);
 	}
 
 	return {
 		subscribe,
-		intialize,
 		add,
 		createPage,
 		cachePages
 	};
 }
 
-export const books = createBookStore();
+export const books = await createBookStore();
 
 export function getPage(pageNumber: number, bookName: string) {
 	return derived(books, ($books) => {
 		if (browser) {
 			const page = $books.get(bookName)?.pageUrls[pageNumber];
 			if (!page) {
-				books.createPage(pageNumber, bookName);
+				books.createPage(pageNumber, bookName, $books);
 			}
 
 			return page ?? '';
