@@ -28,5 +28,6 @@
 	}
 </script>
 
+<div><a href="/book/{$page.params.bookName}">Pages</a></div>
 <img src={$pageUrl} loading="lazy" alt="" width="700" />
 <svelte:window on:keyup={onArrow} />
