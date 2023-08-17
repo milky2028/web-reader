@@ -1,4 +1,5 @@
 import type { BookManifest } from './bookStore';
+import { exists } from './exists';
 import { writeFile } from './writeFile';
 
 export async function extractPage(
@@ -8,7 +9,6 @@ export async function extractPage(
 ) {
 	const { booksDirectory } = await import('$lib/directories');
 	const { Archive } = await import('$lib/archive');
-	const { exists } = await import('./exists');
 	const { getFile } = await import('./getFile');
 
 	const bookHandle = await booksDirectory.getDirectoryHandle(bookName);

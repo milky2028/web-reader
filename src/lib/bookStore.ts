@@ -1,13 +1,13 @@
 import { derived, writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { extractPage } from './extractPage';
+import { writeFile } from './writeFile';
 
 const MANIFEST = 'book-manifest.json';
 
 export type BookManifest = { name: string; path: string; pages: string[]; pageUrls: string[] };
 
 async function writeManifest(manifest: Map<string, BookManifest>) {
-	const { writeFile } = await import('./writeFile');
 	const { root } = await import('$lib/directories');
 
 	const manifestFile = new File([JSON.stringify(Array.from(manifest))], MANIFEST);
