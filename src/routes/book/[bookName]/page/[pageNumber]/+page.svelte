@@ -12,18 +12,16 @@
 	let secondPageUrl = readable('');
 	$: secondPageUrl = getPage(+$page.params.pageNumber + 1, $page.params.bookName);
 
-	let imgIsTwoPageSpread = false;
+	let showingTwoPages = false;
 	$: (async () => {
 		const [oneIs, twoIs] = await Promise.all([
 			isTwoPageSpread($firstPageUrl),
 			isTwoPageSpread($secondPageUrl)
 		]);
 
-		imgIsTwoPageSpread = oneIs || twoIs;
+		const imgIsTwoPageSpread = oneIs || twoIs;
+		showingTwoPages = $isLandscapeMode && +$page.params.pageNumber !== 0 && !imgIsTwoPageSpread;
 	})();
-
-	let showingTwoPages = false;
-	$: showingTwoPages = $isLandscapeMode && +$page.params.pageNumber !== 0 && !imgIsTwoPageSpread;
 
 	let numberOfPagesToIncrement = 1;
 	$: numberOfPagesToIncrement = showingTwoPages ? 2 : 1;
@@ -62,12 +60,13 @@
 <style>
 	.page-container {
 		display: grid;
-		grid-template-areas: page1;
+		column-gap: 0.5rem;
+		grid-template-columns: 1fr min-content 1fr;
+		grid-template-areas: 'space1 page1 space2';
 	}
 
 	.landscape {
 		grid-template-columns: 1fr min-content min-content 1fr;
-		column-gap: 0.5rem;
 		grid-template-areas: 'space1 page1 page2 space2';
 	}
 
