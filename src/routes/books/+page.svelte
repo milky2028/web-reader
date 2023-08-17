@@ -13,8 +13,12 @@
 	$: covers = getCovers($books);
 </script>
 
-{#each $books as [bookName], i (bookName)}
-	<a href="/book/{bookName}/page/0">
-		<img src={$covers[i]} loading="lazy" alt="" width="200" />
-	</a>
-{/each}
+{#if $books.size > 0}
+	{#each $books as [bookName], i (bookName)}
+		<a href="/book/{bookName}/page/0">
+			<img src={$covers[i]} loading="lazy" alt="" width="200" />
+		</a>
+	{/each}
+{:else}
+	<div>No books uploaded</div>
+{/if}
