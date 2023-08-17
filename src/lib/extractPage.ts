@@ -12,7 +12,8 @@ export async function extractPage(
 	const { booksDirectory } = await import('$lib/directories');
 	const { Archive } = await import('$lib/archive');
 
-	const bookHandle = await booksDirectory.getDirectoryHandle(bookName);
+	const resolvedBookDir = await booksDirectory;
+	const bookHandle = await resolvedBookDir.getDirectoryHandle(bookName);
 	const book = $books.get(bookName);
 	let url = book?.pageUrls[pageNumber];
 

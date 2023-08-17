@@ -5,8 +5,10 @@ export type IterableDirectory = FileSystemDirectoryHandle & {
 	[Symbol.asyncIterator](): AsyncIterator<DirectoryIteratorResult>;
 };
 
-export const root = await navigator.storage.getDirectory();
+export const root = navigator.storage.getDirectory();
 
-export const booksDirectory = (await root.getDirectoryHandle('books', {
-	create: true
-})) as IterableDirectory;
+export const booksDirectory = root.then((directory) =>
+	directory.getDirectoryHandle('books', {
+		create: true
+	})
+);

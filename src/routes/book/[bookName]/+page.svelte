@@ -10,7 +10,8 @@
 		const unsubscribe = books.subscribe(async ($books) => {
 			if ($books.size > 0) {
 				setTimeout(() => unsubscribe());
-				const bookDirectory = await booksDirectory.getDirectoryHandle($page.params.bookName);
+				const resolvedDir = await booksDirectory;
+				const bookDirectory = await resolvedDir.getDirectoryHandle($page.params.bookName);
 				const archiveHandle = await bookDirectory.getFileHandle($page.params.bookName);
 				const archiveFile = await archiveHandle.getFile();
 

@@ -26,7 +26,10 @@
 				if (coverHandle instanceof CompressedFile) {
 					const cover = await coverHandle.extract();
 
-					const bookDirectory = await booksDirectory.getDirectoryHandle(bookName, { create: true });
+					const resolvedBookDir = await booksDirectory;
+					const bookDirectory = await resolvedBookDir.getDirectoryHandle(bookName, {
+						create: true
+					});
 					writeFile(bookName, bookDirectory, file);
 
 					const coverUrl = URL.createObjectURL(cover);

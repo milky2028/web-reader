@@ -11,14 +11,15 @@ async function writeManifest(manifest: Map<string, BookManifest>) {
 	const { root } = await import('$lib/directories');
 
 	const manifestFile = new File([JSON.stringify(Array.from(manifest))], MANIFEST);
-	return writeFile(MANIFEST, root, manifestFile);
+	return writeFile(MANIFEST, await root, manifestFile);
 }
 
 async function getManifest() {
 	try {
 		const { root } = await import('$lib/directories');
 
-		const manifestHandle = await root.getFileHandle(MANIFEST);
+		const rootDir = await root;
+		const manifestHandle = await rootDir.getFileHandle(MANIFEST);
 		const manifestFile = await manifestHandle.getFile();
 		const manifestText = await manifestFile.text();
 
@@ -28,24 +29,26 @@ async function getManifest() {
 	}
 }
 
-async function createBookStore() {
+function createBookStore() {
 	const { subscribe, update, set } = writable(new Map<string, BookManifest>());
 
-	if (browser) {
-		const manifest = await getManifest();
+	async function initialize() {
+		if (browser) {
+			const manifest = await getManifest();
 
-		set(manifest);
-		subscribe((manifest) => {
-			if (browser && manifest.size > 0) {
-				const manifestWithoutUrls = new Map(
-					[...manifest.entries()].map(([bookName, bookManifest]) => {
-						return [bookName, { ...bookManifest, pageUrls: [] }];
-					})
-				);
+			set(manifest);
+			subscribe((manifest) => {
+				if (browser && manifest.size > 0) {
+					const manifestWithoutUrls = new Map(
+						[...manifest.entries()].map(([bookName, bookManifest]) => {
+							return [bookName, { ...bookManifest, pageUrls: [] }];
+						})
+					);
 
-				writeManifest(manifestWithoutUrls);
-			}
-		});
+					writeManifest(manifestWithoutUrls);
+				}
+			});
+		}
 	}
 
 	async function createPage(
@@ -69,11 +72,13 @@ async function createBookStore() {
 	return {
 		subscribe,
 		add,
-		createPage
+		createPage,
+		initialize
 	};
 }
 
-export const books = await createBookStore();
+export const books = createBookStore();
+books.initialize();
 
 export function getPage(pageNumber: number, bookName: string) {
 	return derived(books, ($books) => {
