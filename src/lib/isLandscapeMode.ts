@@ -5,5 +5,3 @@ export const isLandscapeMode = readable(globalThis.innerWidth > globalThis.inner
 		set(globalThis.innerWidth > globalThis.innerHeight)
 	);
 });
-
-isLandscapeMode.subscribe(($isLandscape) => console.log($isLandscape));
