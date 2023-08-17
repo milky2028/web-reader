@@ -75,6 +75,7 @@
 
 	img {
 		max-width: 100vw;
+		min-height: calc(100vh - 40px);
 		max-height: calc(100vh - 40px);
 	}
 </style>
