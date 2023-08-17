@@ -62,11 +62,13 @@
 <style>
 	.page-container {
 		display: grid;
-		place-items: center;
+		grid-template-areas: page1;
 	}
 
 	.landscape {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 1fr min-content min-content 1fr;
+		column-gap: 0.5rem;
+		grid-template-areas: 'space1 page1 page2 space2';
 	}
 
 	img {
@@ -78,8 +80,8 @@
 <svelte:window on:keyup={onArrow} />
 <div><a href="/book/{$page.params.bookName}">Pages</a></div>
 <div class="page-container" class:landscape={showingTwoPages}>
-	<img src={$firstPageUrl} alt="" />
+	<img style="grid-area: page1;" src={$firstPageUrl} alt="" />
 	{#if showingTwoPages}
-		<img src={$secondPageUrl} alt="" />
+		<img style="grid-area: page2;" src={$secondPageUrl} alt="" />
 	{/if}
 </div>
