@@ -15,7 +15,7 @@
 		const files = (event.target as HTMLInputElement)?.files ?? [];
 		const processFiles = Array.from(files).map(async (file) => {
 			try {
-				const bookName = file.name.split('.')[0];
+				const bookName = file.name.slice(0, file.name.length - 4);
 
 				const archive = await Archive.open(file);
 				const archivedFiles = await archive.getFilesArray();
