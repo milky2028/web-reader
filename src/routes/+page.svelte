@@ -31,6 +31,7 @@
 
 					const coverUrl = URL.createObjectURL(cover);
 					const manifest: BookManifest = {
+						path: pages[0].path,
 						name: bookName,
 						pages: pages.map((page) => page.file.name),
 						pageUrls: [coverUrl]

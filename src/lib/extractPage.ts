@@ -29,7 +29,7 @@ export async function extractPage(
 
 			const pageFileName = $books.get(bookName)?.pages[pageNumber];
 			if (pageFileName) {
-				const file = await archive.extractSingleFile(pageFileName);
+				const file = await archive.extractSingleFile(`${book.path}${pageFileName}`);
 
 				// @ts-expect-error _worker is private, but workers don't terminate properly
 				archive._worker.terminate();

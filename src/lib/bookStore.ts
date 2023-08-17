@@ -4,7 +4,7 @@ import { extractPage } from './extractPage';
 
 const MANIFEST = 'book-manifest.json';
 
-export type BookManifest = { name: string; pages: string[]; pageUrls: string[] };
+export type BookManifest = { name: string; path: string; pages: string[]; pageUrls: string[] };
 
 async function writeManifest(manifest: Map<string, BookManifest>) {
 	const { writeFile } = await import('./writeFile');
