@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { books, getPage } from '$lib/bookStore';
 	import { isLandscapeMode } from '$lib/isLandscapeMode';
+	import { isTwoPageSpread } from '$lib/isTwoPageSpread';
 	import { readable } from 'svelte/store';
 
 	let firstPageUrl = readable('');
@@ -11,9 +12,23 @@
 	let secondPageUrl = readable('');
 	$: secondPageUrl = getPage(+$page.params.pageNumber + 1, $page.params.bookName);
 
-	async function onArrow(event: KeyboardEvent) {
-		const numberOfPagesToIncrement = showingTwoPages ? 2 : 1;
+	let imgIsTwoPageSpread = false;
+	$: (async () => {
+		const [oneIs, twoIs] = await Promise.all([
+			isTwoPageSpread($firstPageUrl),
+			isTwoPageSpread($secondPageUrl)
+		]);
 
+		imgIsTwoPageSpread = oneIs || twoIs;
+	})();
+
+	let showingTwoPages = false;
+	$: showingTwoPages = $isLandscapeMode && +$page.params.pageNumber !== 0 && !imgIsTwoPageSpread;
+
+	let numberOfPagesToIncrement = 1;
+	$: numberOfPagesToIncrement = showingTwoPages ? 2 : 1;
+
+	async function onArrow(event: KeyboardEvent) {
 		const pages = $books.get($page.params.bookName)?.pages ?? [];
 		const currentIndex = +$page.params.pageNumber;
 
@@ -42,9 +57,6 @@
 			goto(`/book/${$page.params.bookName}/page/${previousPage}`);
 		}
 	}
-
-	let showingTwoPages = false;
-	$: showingTwoPages = $isLandscapeMode && +$page.params.pageNumber !== 0;
 </script>
 
 <style>
