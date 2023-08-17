@@ -3,6 +3,7 @@
 	import { isImage } from '$lib/isImage';
 	import { type BookManifest, books } from '$lib/bookStore';
 	import { sortPagesCoverFirst } from '$lib/sortPages';
+	import { isMacOSFile } from '$lib/isMacOSFile';
 
 	async function onUpload(event: Event & { currentTarget: HTMLInputElement }) {
 		const { Archive, CompressedFile } = await import('$lib/archive');
@@ -18,7 +19,7 @@
 
 				const archive = await Archive.open(file);
 				const archivedFiles = await archive.getFilesArray();
-				const pages = archivedFiles.filter(isImage).sort(sortPagesCoverFirst);
+				const pages = archivedFiles.filter(isMacOSFile).filter(isImage).sort(sortPagesCoverFirst);
 
 				const coverHandle = pages[0].file;
 
