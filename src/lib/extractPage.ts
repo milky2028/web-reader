@@ -3,6 +3,12 @@ import { exists } from './exists';
 import { getFile } from './getFile';
 import { writeFile } from './writeFile';
 
+function decodeImage(url: string) {
+	const img = new Image();
+	img.src = url;
+	return img.decode();
+}
+
 export async function extractPage(
 	pageNumber: number,
 	bookName: string,
@@ -13,13 +19,16 @@ export async function extractPage(
 
 	const bookHandle = await booksDirectory.getDirectoryHandle(bookName);
 	const book = $books.get(bookName);
-	const url = book?.pageUrls[pageNumber];
+	let url = book?.pageUrls[pageNumber];
 
 	if (book) {
 		if (!url) {
 			if (await exists(`${pageNumber}`, bookHandle)) {
 				const file = await getFile(`${pageNumber}`, bookHandle);
-				book.pageUrls[pageNumber] = URL.createObjectURL(file);
+
+				url = URL.createObjectURL(file);
+				book.pageUrls[pageNumber] = url;
+				await decodeImage(url);
 
 				return $books;
 			}
@@ -31,9 +40,12 @@ export async function extractPage(
 			if (pageFileName) {
 				const file = await archive.extractSingleFile(`${book.path}${pageFileName}`);
 
+				url = URL.createObjectURL(file);
+				book.pageUrls[pageNumber] = url;
+				await decodeImage(url);
+
 				// @ts-expect-error _worker is private, but workers don't terminate properly
 				archive._worker.terminate();
-				book.pageUrls[pageNumber] = URL.createObjectURL(file);
 
 				await writeFile(`${pageNumber}`, bookHandle, file);
 				return $books;
