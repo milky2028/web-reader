@@ -4,9 +4,13 @@ import { getFile } from './getFile';
 import { writeFile } from './writeFile';
 
 function decodeImage(url: string) {
-	const img = new Image();
-	img.src = url;
-	return img.decode();
+	if (url) {
+		const img = new Image();
+		img.src = url;
+		return img.decode();
+	}
+
+	return Promise.resolve();
 }
 
 export async function extractPage(
