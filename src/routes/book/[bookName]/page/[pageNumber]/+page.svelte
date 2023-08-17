@@ -6,11 +6,19 @@
 	import { isTwoPageSpread } from '$lib/isTwoPageSpread';
 	import { readable } from 'svelte/store';
 
+	let pageNumber = +$page.params.pageNumber;
+	$: pageNumber = +$page.params.pageNumber;
+
+	let bookName = $page.params.bookName;
+	$: bookName = $page.params.bookName;
+
+	const lastPage = $books.get(bookName)?.pages.length ?? 0;
+
 	let firstPageUrl = readable('');
-	$: firstPageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
+	$: firstPageUrl = getPage(pageNumber, bookName);
 
 	let secondPageUrl = readable('');
-	$: secondPageUrl = getPage(+$page.params.pageNumber + 1, $page.params.bookName);
+	$: secondPageUrl = getPage(pageNumber + 1, bookName);
 
 	let showingTwoPages = false;
 	$: (async () => {
@@ -20,23 +28,18 @@
 		]);
 
 		const imgIsTwoPageSpread = oneIs || twoIs;
-		showingTwoPages = $isLandscapeMode && +$page.params.pageNumber !== 0 && !imgIsTwoPageSpread;
+		showingTwoPages = $isLandscapeMode && pageNumber !== 0 && !imgIsTwoPageSpread;
 	})();
 
 	let numberOfPagesToIncrement = 1;
 	$: numberOfPagesToIncrement = showingTwoPages ? 2 : 1;
 
 	async function onArrow(event: KeyboardEvent) {
-		const pages = $books.get($page.params.bookName)?.pages ?? [];
-		const currentIndex = +$page.params.pageNumber;
-
 		if (event.key === 'ArrowRight') {
-			const lastPage = pages.length - 1;
-
 			const nextPage =
-				currentIndex + numberOfPagesToIncrement >= lastPage
+				pageNumber + numberOfPagesToIncrement >= lastPage
 					? lastPage
-					: currentIndex + numberOfPagesToIncrement;
+					: pageNumber + numberOfPagesToIncrement;
 
 			await Promise.all([
 				books.createPage(nextPage, $page.params.bookName, $books),
@@ -46,13 +49,13 @@
 			books.createPage(nextPage + 2, $page.params.bookName, $books);
 			books.createPage(nextPage + 3, $page.params.bookName, $books);
 
-			goto(`/book/${$page.params.bookName}/page/${nextPage}`);
+			goto(`/book/${bookName}/page/${nextPage}`);
 		}
 
 		if (event.key === 'ArrowLeft') {
 			const previousPage =
-				currentIndex - numberOfPagesToIncrement < 0 ? 0 : currentIndex - numberOfPagesToIncrement;
-			goto(`/book/${$page.params.bookName}/page/${previousPage}`);
+				pageNumber - numberOfPagesToIncrement < 0 ? 0 : pageNumber - numberOfPagesToIncrement;
+			goto(`/book/${bookName}/page/${previousPage}`);
 		}
 	}
 </script>
@@ -77,7 +80,7 @@
 </style>
 
 <svelte:window on:keyup={onArrow} />
-<div><a href="/book/{$page.params.bookName}">Pages</a></div>
+<div><a href="/book/{bookName}">Pages</a></div>
 <div class="page-container" class:landscape={showingTwoPages}>
 	<img style="grid-area: page1;" src={$firstPageUrl} alt="" />
 	{#if showingTwoPages}
