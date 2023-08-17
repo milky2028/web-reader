@@ -8,6 +8,9 @@
 	$: pageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
 
 	async function onArrow(event: KeyboardEvent) {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
 		const pages = $books.get($page.params.bookName)?.pages ?? [];
 		const currentIndex = +$page.params.pageNumber;
 
@@ -28,6 +31,18 @@
 	}
 </script>
 
-<div><a href="/book/{$page.params.bookName}">Pages</a></div>
-<img src={$pageUrl} alt="" width="700" />
+<style>
+	.page-container {
+		display: grid;
+		place-items: center;
+	}
+
+	img {
+		max-width: 100vw;
+		max-height: calc(100vh - 40px);
+	}
+</style>
+
 <svelte:window on:keyup={onArrow} />
+<div><a href="/book/{$page.params.bookName}">Pages</a></div>
+<div class="page-container"><img src={$pageUrl} alt="" /></div>
