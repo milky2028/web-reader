@@ -2,19 +2,23 @@
 	import { books, getPage, type BookManifest } from '$lib/bookStore';
 	import { derived, readable } from 'svelte/store';
 
-	function getCovers($books: Map<string, BookManifest>) {
+	const sortedBooks = derived(books, (books) =>
+		[...books].sort(([bookNameA], [bookNameB]) => bookNameA.localeCompare(bookNameB))
+	);
+
+	function getCovers($sortedBooks: [string, BookManifest][]) {
 		return derived(
-			[...$books].map(([bookName]) => getPage(0, bookName)),
-			(cover) => cover
+			$sortedBooks.map(([bookName]) => getPage(0, bookName)),
+			(covers) => covers
 		);
 	}
 
 	let covers = readable([] as string[]);
-	$: covers = getCovers($books);
+	$: covers = getCovers($sortedBooks);
 </script>
 
 {#if $books.size > 0}
-	{#each $books as [bookName], i (bookName)}
+	{#each $sortedBooks as [bookName], i (bookName)}
 		<a href="/book/{bookName}/page/0">
 			<img src={$covers[i]} loading="lazy" alt="" width="200" />
 		</a>
