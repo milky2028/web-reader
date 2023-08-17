@@ -8,9 +8,6 @@
 	$: pageUrl = getPage(+$page.params.pageNumber, $page.params.bookName);
 
 	async function onArrow(event: KeyboardEvent) {
-		event.preventDefault();
-		event.stopImmediatePropagation();
-
 		const pages = $books.get($page.params.bookName)?.pages ?? [];
 		const currentIndex = +$page.params.pageNumber;
 
