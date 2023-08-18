@@ -58,6 +58,11 @@
 			goto(`/book/${bookName}/page/${previousPage}`);
 		}
 	}
+
+	let pageContainer: HTMLDivElement | null = null;
+	function requestFullscreen() {
+		pageContainer?.requestFullscreen();
+	}
 </script>
 
 <style>
@@ -81,8 +86,10 @@
 </style>
 
 <svelte:window on:keyup={onArrow} />
-<div><a href="/book/{bookName}">Pages</a></div>
-<div class="page-container" class:landscape={showingTwoPages}>
+<div>
+	<a href="/book/{bookName}">Pages</a><button on:click={requestFullscreen}>Fullscreen</button>
+</div>
+<div bind:this={pageContainer} class="page-container" class:landscape={showingTwoPages}>
 	<img style="grid-area: page1;" src={$firstPageUrl} alt="" />
 	{#if showingTwoPages}
 		<img style="grid-area: page2;" src={$secondPageUrl} alt="" />
