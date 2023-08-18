@@ -15,23 +15,22 @@ async function getDirectoryFromPath(
 	return handle;
 }
 
-self.addEventListener(
-	'message',
-	async ({ data: { path, content } }: MessageEvent<{ path: string; content: File }>) => {
-		try {
-			const root = await navigator.storage.getDirectory();
-			const directory = await getDirectoryFromPath(path, root);
-			const fileHandle = await directory.getFileHandle(content.name, { create: true });
+type WriteEvent = MessageEvent<{ path: string; content: File }>;
 
-			const writeHandle = await fileHandle.createSyncAccessHandle();
-			const buffer = await content.arrayBuffer();
-			writeHandle.write(buffer, { at: 0 });
+self.addEventListener('message', async ({ data: { path, content } }: WriteEvent) => {
+	try {
+		const root = await navigator.storage.getDirectory();
+		const directory = await getDirectoryFromPath(path, root);
+		const fileHandle = await directory.getFileHandle(content.name, { create: true });
 
-			await writeHandle.close();
-		} catch (e) {
-			console.error(e);
-		} finally {
-			postMessage('complete');
-		}
+		const writeHandle = await fileHandle.createSyncAccessHandle();
+		const buffer = await content.arrayBuffer();
+		writeHandle.write(buffer, { at: 0 });
+
+		await writeHandle.close();
+	} catch (e) {
+		console.error(e);
+	} finally {
+		postMessage('complete');
 	}
-);
+});
